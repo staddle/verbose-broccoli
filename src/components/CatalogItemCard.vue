@@ -3,11 +3,9 @@
         <img :src="this.item.image" class="card-img-top" alt="...">
         <div class="card-body">
             <h5 class="card-title">{{ this.item.name }}</h5>
-            <span class="fw-light text-muted fs-7">{{ this.item.category}} - {{item.subCategory}}</span>
-            <p class="card-text">{{ this.item.description }}</p>
             <div class="d-flex justify-content-between align-items-center">
                 <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-outline-secondary"> {{ this.item.price}} $ </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" @click="openDetailView()"> {{ this.item.price}} $ </button>
                 </div>
                 <small class="text-muted">{{getElapsedTime(this.item.timestamp)}}</small>
             </div>
@@ -39,6 +37,9 @@ export default {
       } else {
         return `${seconds} seconds ago`;
       }
+    },
+    openDetailView() {
+      this.$emit("open-detail-view", this.item);
     },
   },
 };

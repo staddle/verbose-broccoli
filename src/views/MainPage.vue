@@ -4,20 +4,30 @@
       <FrontIntroduction></FrontIntroduction>
     </section>
 
-    <div class="album py-5 bg-light">
-      <CatalogComponent></CatalogComponent>
-    </div>
+    <CatalogComponent @add-to-cart="addToCart"></CatalogComponent>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import CatalogComponent from "../components/CatalogComponent.vue";
 import FrontIntroduction from "../components/FrontIntroduction.vue";
+import { useStore } from "@/stores/cart";
 
 export default {
   components: {
     CatalogComponent,
     FrontIntroduction,
+  },
+  methods: {
+    addToCart(item: CatalogItem) {
+      this.cart.add(item);
+    },
+  },
+  setup() {
+    const cart = useStore();
+    return {
+      cart,
+    };
   },
 };
 </script>

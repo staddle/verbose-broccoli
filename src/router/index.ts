@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import MainPage from "../views/MainPage.vue";
 import SignIn from "../views/SignIn.vue";
 import CheckOut from "../views/CheckOut.vue";
+import ItemView from "../views/ItemView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +22,11 @@ const router = createRouter({
       name: "checkout",
       component: CheckOut,
     },
+    {
+      path: "/item/:id",
+      name: "item",
+      component: ItemView,
+    }
   ],
 });
 

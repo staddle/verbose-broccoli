@@ -6,7 +6,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import NavComponent from "./components/NavComponent.vue";
 import FooterComponent from "./components/FooterComponent.vue";
 

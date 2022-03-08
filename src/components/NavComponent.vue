@@ -30,6 +30,9 @@
         </form>
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="/cart"><!--img-->Cart: {{ cart.itemCount }}</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" aria-current="page" href="/signin">Sign in</a>
           </li>
         </ul>
@@ -38,10 +41,19 @@
   </nav>
 </template>
 
-<script>
+<script lang="ts">
 import "../assets/styles/nav.scss";
+import { useStore } from "@/stores/cart";
 
-export default {};
+export default {
+    setup() {
+      const cart = useStore();
+
+      return {
+        cart,
+      }
+  }
+};
 </script>
 
 <style></style>
