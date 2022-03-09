@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="container-fluid">
-      <router-link class="navbar-brand brand-img" to="/">Broccoli</router-link>
+      <router-link class="navbar-brand text-primary fw-bold" to="/">Broccoli</router-link>
       <button
         class="navbar-toggler"
         type="button"
@@ -47,7 +47,6 @@
 </template>
 
 <script lang="ts">
-import "../assets/styles/nav.scss";
 import { useStore } from "@/stores/cart";
 import { getRandomCategory } from "@/assets/categories";
 
