@@ -9,12 +9,15 @@
                 <div class="col text d-flex flex-column justify-content-between">
                     <div>
                         <h3 class="name">{{ item.name }}</h3>
-                        <h5 class="categories">{{ item.category}} - {{ item.subCategory }}</h5>
+                        <h5 class="categories">{{ getCategoryName(item.category) }} - {{ getSubcategoryName(item.category, item.subCategory) }}</h5>
                     </div>
                     <div class="card-text">{{ item.description }}</div>
                     <div class="flex-bottom row">
                         <div class="col">
-                            <h4>{{ item.price }} $</h4>
+                            <h4>
+                                {{ getPriceInEth(item.price) }} 
+                                <font-awesome-icon :icon="['fa-brands', 'ethereum']" />
+                            </h4>
                         </div>
                         <div class="col">
                             <button class="btn btn-primary" @click="addToCart">Add to Cart</button>
@@ -28,10 +31,17 @@
 
 <script lang="ts">
 import CatalogItem from "../models/CatalogItem";
+import { categories } from "@/assets/categories";
+import { getPriceInEth } from "@/integration/etherUtilities";
 
 export default {
     props: {
         item: CatalogItem,
+    },
+    data() {
+        return {
+            categoriesArray: categories,
+        }
     },
     methods: {
         addToCart() {
@@ -43,6 +53,15 @@ export default {
         },
         dontclose() {
             return false;
+        },
+        getCategoryName(category: number) : string {
+            return categories[category-1].name;
+        },
+        getSubcategoryName(category: number, subcategory: number) : string {
+            return categories[category-1].subCategories[subcategory-1].name;
+        },
+        getPriceInEth(price: number) {
+            return getPriceInEth(price);
         },
     },
 }

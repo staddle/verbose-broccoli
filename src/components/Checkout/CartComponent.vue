@@ -7,8 +7,11 @@
     <ul class="list-group mb-3">
         <CartItemComponent v-for="product in cart.fullCart" :key="product.id" :item="product"></CartItemComponent>
         <li class="list-group-item d-flex justify-content-between border-top-bold">
-            <span>Total (USD)</span>
-            <strong>${{ cart.totalPrice }}</strong>
+            <span>Total (ETH)</span>
+            <strong>
+                {{ getPriceInEth(cart.totalPrice) }}
+                <font-awesome-icon :icon="['fa-brands', 'ethereum']" />
+            </strong>
         </li>
     </ul>
   </div>
@@ -17,6 +20,7 @@
 <script lang="ts">
 import CartItemComponent from "@/components/Checkout/CartItemComponent.vue";
 import { useStore } from "@/stores/cart";
+import { getPriceInEth } from "@/integration/etherUtilities";
 
 export default {
     components : {
@@ -27,6 +31,11 @@ export default {
         return {
             cart,
         };
+    },
+    methods: {
+        getPriceInEth(price: number) {
+            return getPriceInEth(price);
+        },
     },
 }
 </script>

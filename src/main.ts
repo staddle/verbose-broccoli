@@ -12,9 +12,10 @@ import "@/assets/styles/theme.scss";
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faCartShopping } from "@fortawesome/free-solid-svg-icons";
+import { faEthereum } from '@fortawesome/free-brands-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
-library.add(faCartShopping);
+library.add(faCartShopping, faEthereum);
 
 const app = createApp(App);
 

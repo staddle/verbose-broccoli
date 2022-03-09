@@ -39,4 +39,5 @@ export default class CatalogItem {
     this.runtime = runtime;
     this.deposit = deposit;
   }
+
 }
