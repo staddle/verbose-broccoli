@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
     <div class="container-fluid">
-      <a class="navbar-brand brand-img" href="/">Broccoli</a>
+      <router-link class="navbar-brand brand-img" to="/">Broccoli</router-link>
       <button
         class="navbar-toggler"
         type="button"
@@ -16,24 +16,29 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Home</a>
+            <router-link class="nav-link" to="/">Home</router-link>
           </li>
         </ul>
         <form class="d-flex">
           <input
             class="form-control me-2"
             type="search"
-            placeholder="Search"
+            :placeholder="searchPlaceholder+'...'"
             aria-label="Search"
           />
-          <button class="btn btn-outline-success" type="submit">Search</button>
+          <button class="btn btn-outline-primary" type="submit">Search</button>
         </form>
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/cart"><!--img-->Cart: {{ cart.itemCount }}</a>
+            <router-link class="nav-link" to="/checkout">
+              <div class="position-relative h-100 w-100">
+                <font-awesome-icon class="fs-4 text-primary" :icon="['fas', 'cart-shopping']" />
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-secondary">{{ cart.itemCount }}</span>
+              </div>
+            </router-link>
           </li>
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/signin">Sign in</a>
+            <router-link class="nav-link" to="/signin">Sign in</router-link>
           </li>
         </ul>
       </div>
@@ -44,8 +49,14 @@
 <script lang="ts">
 import "../assets/styles/nav.scss";
 import { useStore } from "@/stores/cart";
+import { getRandomCategory } from "@/assets/categories";
 
 export default {
+    data() {
+      return {
+        searchPlaceholder : getRandomCategory(),
+      }
+    },
     setup() {
       const cart = useStore();
 
@@ -56,4 +67,5 @@ export default {
 };
 </script>
 
-<style></style>
+<style lang="scss">
+</style>

@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <div class="album py-5 bg-light">
+    <div class="album py-5">
       <div class="row row-cols-1 row-cols-md-5 g-4">
         <CatalogItemCard v-for="catalogItem in catalog" :key="catalogItem.id" :item="catalogItem" class="m-3 h-100" @open-detail-view="openDetailView"></CatalogItemCard>
       </div>
@@ -12,7 +12,7 @@
 <script lang="ts">
 import CatalogItemCard from "./CatalogItemCard.vue";
 import DetailItem from "./DetailItem.vue";
-import { sampleItems } from "../assets/sampleItems"
+import { generateSampleItems } from "../assets/sampleItems"
 import CatalogItem from "../models/CatalogItem";
 
 export default {
@@ -22,8 +22,8 @@ export default {
   },
   data: function () {
     return {
-      catalog: sampleItems,
-      detailItem: CatalogItem,
+      catalog: generateSampleItems(10),
+      detailItem: null,
     };
   },
   methods: {

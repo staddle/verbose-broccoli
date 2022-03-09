@@ -12,6 +12,7 @@
 import CatalogComponent from "../components/CatalogComponent.vue";
 import FrontIntroduction from "../components/FrontIntroduction.vue";
 import { useStore } from "@/stores/cart";
+import type CatalogItem from "@/models/CatalogItem";
 
 export default {
   components: {

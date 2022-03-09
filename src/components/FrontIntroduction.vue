@@ -2,10 +2,10 @@
   <div>
     <div class="row py-lg-5">
       <div class="col-lg-6 col-md-8 mx-auto">
-        <h1 class="fw-light brand-name-top">Broccoli</h1>
+        <h1 class="fw-light text-primary fw-bold">Broccoli</h1>
         <p class="lead text-muted">
           Buy and sell your favorite items through
-          <span class="brand-name-intext">Broccoli</span>. Secured by
+          <span class="text-primary fw-bolder">Broccoli</span>. Secured by
           smart contracts on the
           <img
             class="logo-inline"
@@ -13,7 +13,7 @@
           />Ethereum blockchain.
         </p>
         <p>
-          <a href="#" class="btn btn-primary my-2">Try it today!</a>
+          <a href="#" class="btn btn-primary text-light my-2">Try it today!</a>
           or
           <a href="#" class="btn btn-secondary my-2">Sign in</a>
         </p>
@@ -25,19 +25,13 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {};
 </script>
 
-<style>
-.brand-name-top {
-  color: #05a61b;
-  font-weight: 900;
-}
-.brand-name-intext {
-  color: rgb(6, 167, 27);
-  font-weight: bold;
-}
+<style lang="scss">
+$primary: rgb(6, 167, 27);
+
 .bg-image{
   height: 100%;
   position: absolute;

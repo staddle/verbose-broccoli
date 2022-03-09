@@ -1,25 +1,26 @@
 import { defineStore } from "pinia";
-import CatalogItem from "../models/CatalogItem"
+import Cart from "@/models/Cart";
+import type CatalogItem from "@/models/CatalogItem";
 
-export const useStore = defineStore({
-  id: "cart",
+export const useStore = defineStore('cart', {
   state: () => ({
-    items: [],
+    cart: new Cart()
   }),
   getters: {
-    itemCount: (state) => state.items.length,
-    totalPrice: (state) => state.items.reduce((total, item) => total + item.price, 0),
-    specificItem: (state) => (id) => state.items.find(item => item.id === id)
+    itemCount: (state) => state.cart.itemCount,
+    totalPrice: (state) => state.cart.totalPrice,
+    specificItem: (state) => (id : string) => state.cart.specificItem(id),
+    fullCart: (state) => state.cart.fullCart,
   },
   actions: {
     add(item: CatalogItem) {
-      this.items.push(item);
+      this.cart.add(item);
     },
     remove(item: CatalogItem) {
-      this.items.splice(this.items.indexOf(item), 1);
+      this.cart.remove(item);
     },
-    removeById(id: number) {
-      this.items.splice(this.items.findIndex(item => item.id === id), 1);
+    removeById(id: string) {
+      this.cart.removeById(id);
     },
   },
 });

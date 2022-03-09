@@ -1,5 +1,5 @@
 <template>
-  <div class="onTop">
+  <div class="onTop" @click.self="close">
         <div class="item card shadow-sm">
             <button @click="close" class="btn btn-close closeBtn"></button>
             <div class="card-body row">
@@ -36,10 +36,14 @@ export default {
     methods: {
         addToCart() {
             this.$emit("add-to-cart", this.item);
+            this.$emit("close");
         },
         close() {
             this.$emit("close");
-        }
+        },
+        dontclose() {
+            return false;
+        },
     },
 }
 </script>
