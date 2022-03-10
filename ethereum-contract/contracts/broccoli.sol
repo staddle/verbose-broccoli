@@ -25,8 +25,8 @@ contract broccoli is Pausable, Ownable {
   mapping(uint => Item) items;
   uint public numItems;
   mapping(address => uint) pendingWithdrawals;
-  uint public minimumDepositRatio; //200>=minimumDepositRatio>=100
-  uint public cut; //200>=cut>=100
+  uint public minimumDepositRatio; //100>=minimumDepositRatio>=0
+  uint public cut; //100>=cut>=0
 
   error MinimumDepositNotMet();
   error NotEnoughEther();
@@ -34,6 +34,7 @@ contract broccoli is Pausable, Ownable {
   error ItemDoesNotExist();
   error CutNotValid();
   error MinimumDepositNotValid();
+  error NothingToWithdraw();
 
   event ItemAdded(address indexed seller, uint indexed id);
   event ItemBought(address indexed buyer, uint indexed id);
@@ -63,13 +64,13 @@ contract broccoli is Pausable, Ownable {
   }
 
   modifier cutValid(uint _cut) {
-    if (_cut < 100 || _cut > 200)
+    if (_cut < 0 || _cut > 100)
         revert CutNotValid();
     _;
   }
 
   modifier minimumDepositValid(uint _minimumDepositRatio) {
-    if (_minimumDepositRatio < 100 || _minimumDepositRatio > 200)
+    if (_minimumDepositRatio < 0 || _minimumDepositRatio > 100)
         revert MinimumDepositNotValid();
     _;
   }
@@ -89,13 +90,16 @@ contract broccoli is Pausable, Ownable {
     return items[id].seller; 
   }
 
+  function getPendingWithdrawal() public view returns (uint) {
+    return pendingWithdrawals[msg.sender];
+  }
 
   //Public Methods
-  function setCut(uint _cut) public onlyOwner cutValid(_cut) {
+  function setCut(uint _cut) public onlyOwner whenNotPaused cutValid(_cut) {
     cut = _cut;
   }
 
-  function setMinimumDepositRatio(uint _minimumDepositRatio) public onlyOwner minimumDepositValid(_minimumDepositRatio) {
+  function setMinimumDepositRatio(uint _minimumDepositRatio) public onlyOwner whenNotPaused minimumDepositValid(_minimumDepositRatio) {
     minimumDepositRatio = _minimumDepositRatio;
   }
 
@@ -107,7 +111,8 @@ contract broccoli is Pausable, Ownable {
     _unpause();
   }
 
-  function addItem(string calldata _name, 
+  function addItem(
+      string calldata _name, 
       string calldata _description, 
       uint _price, 
       string calldata _image, 
@@ -116,7 +121,7 @@ contract broccoli is Pausable, Ownable {
       uint _timestamp, 
       uint _runtime) 
       payable public whenNotPaused minimumDeposit(_price, minimumDepositRatio) {
-    numItems = numItems++;
+    numItems = numItems+1;
     Item storage i = items[numItems]; 
     i.name = _name;
     i.description = _description;
@@ -145,6 +150,9 @@ contract broccoli is Pausable, Ownable {
   //https://docs.soliditylang.org/en/latest/common-patterns.html#withdrawal-from-contracts
   function withdraw() public whenNotPaused {
     uint amount = pendingWithdrawals[msg.sender];
+    if(amount == 0) {
+        revert NothingToWithdraw();
+    }
     //zero the pending refund before sending to prevent re-entrancy attacks
     pendingWithdrawals[msg.sender] = 0;
     payable(msg.sender).transfer(amount);
@@ -159,12 +167,12 @@ contract broccoli is Pausable, Ownable {
 
   //Internal Methods
   function getPriceToPay(uint256 id) internal view returns (uint256) {
-    //return price that buyer has to pay (including site cut)
-    return items[id].price.mul(cut).div(100);
+    //return price that buyer has to pay
+    return items[id].price;
   }
 
   function getAmountToSendToSeller(uint256 id) internal view returns (uint256) {
-    //return amount to send to seller = asking price of item + deposit
-    return items[id].price.add(items[id].deposit);
+    //return amount to send to seller = asking price of item * (100 - cut) + deposit
+    return items[id].price.mul(uint(100).sub(cut)).div(100).add(items[id].deposit);
   }
 }

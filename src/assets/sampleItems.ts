@@ -26,3 +26,5 @@ export const generateSampleItems = (count: number): CatalogItem[] => {
     }
     return items;
 }
+
+module.exports.generateSampleItems = generateSampleItems;

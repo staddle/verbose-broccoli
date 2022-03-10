@@ -41,3 +41,5 @@ export default class CatalogItem {
   }
 
 }
+
+module.exports.CatalogItem = CatalogItem;
