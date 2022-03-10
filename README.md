@@ -1,6 +1,52 @@
-# verbose-broccoli-ts
+# verbose-broccoli
 
-This template should help get you started developing with Vue 3 in Vite.
+<strong style="color:#06a71b;">Broccoli</strong> is a decentralized Application (dApp) for the [Ethereum Virtual Machine (EVM)](https://ethereum.org/en/developers/docs/evm/), able to be run on a blockchain itself. It provides a smart contract using an escrow system for buying and selling any goods.  
+The frontend is developed with **Vue** and **TypeScript** and makes it possible to interact with the smart contract through an easy-to-use webpage.
+
+## Deploying
+Package management is done by _npm_.  
+First, install the dependencies:
+```sh
+npm install
+```
+
+Start the webserver on localhost:
+```sh
+npm run dev
+```
+
+The smart contract is located in the directory `ethereum-contract`. It consists of a __truffle__ project for deploying and testing.  
+First, change into the directory:
+```sh
+cd ethereum-contract
+```
+
+Check the `truffle-config.js` file. It describes how _truffle_ should handle deployment. Check out the [truffle docs](https://trufflesuite.com/docs/truffle/quickstart.html) for syntax and examples.
+
+Compile the contract:
+```sh
+truffle compile
+```
+
+For dev usage, start truffles own blockchain instance:
+
+```sh
+truffle develop
+```
+
+Deploy the contract:
+```sh
+truffle migrate
+```
+
+Or: test the contract:
+```sh
+truffle test
+```
+
+Testing the contract can also be called from the projects root directory through `npm run test:truffle`
+
+===============================================================
 
 ## Recommended IDE Setup
 

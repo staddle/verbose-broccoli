@@ -414,4 +414,44 @@ contract('broccoli', (accounts) => {
                 });
         }); 
     });
+
+    context('when selling 2 items and buying one', () => {
+        const item = generateSampleItem();
+        it('should only return deposit+price of one item to the seller', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(async instance => {
+                    brocc = instance;
+                    await brocc.addItem(item.name, 
+                        item.description, 
+                        item.price,
+                        item.image,
+                        item.category,
+                        item.subCategory,
+                        item.timestamp,
+                        item.runtime,
+                        {from: externalAddress, value: "50000000000000000"});
+                })
+                .then(async () => {
+                    await brocc.addItem(item.name, 
+                        item.description, 
+                        item.price,
+                        item.image,
+                        item.category,
+                        item.subCategory,
+                        item.timestamp,
+                        item.runtime,
+                        {from: externalAddress, value: "50000000000000000"});
+                })
+                .then(async () => {
+                    await brocc.buyItem(2, {from: secondExternalAddress, value: "100000000000000000"});
+                })
+                .then(() => {
+                    return brocc.getPendingWithdrawal.call({ from: externalAddress });
+                })
+                .then(result => {
+                    assert.equal(result, web3.utils.toWei("0.14", "ether"), "Withdrawal should be 0.14 ETH, but was " + result);
+                });
+        });
+    });
 });
