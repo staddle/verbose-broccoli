@@ -9,6 +9,7 @@ contract broccoli is Pausable, Ownable {
   using SafeMath for uint;
 
   struct Item {
+      uint id;
       address payable seller;
       address payable buyer;
       string name;
@@ -20,10 +21,13 @@ contract broccoli is Pausable, Ownable {
       uint timestamp;
       uint runtime;
       uint deposit;
+      bool received;
   }
 
   mapping(uint => Item) items;
   uint public numItems;
+  uint[] public itemsOnSale;
+  uint[] public itemsOnHold;
   mapping(address => uint) pendingWithdrawals;
   uint public minimumDepositRatio; //100>=minimumDepositRatio>=0
   uint public cut; //100>=cut>=0
@@ -35,6 +39,8 @@ contract broccoli is Pausable, Ownable {
   error CutNotValid();
   error MinimumDepositNotValid();
   error NothingToWithdraw();
+  error NotFromBuyer();
+  error couldntFindIndex();
 
   event ItemAdded(address indexed seller, uint indexed id);
   event ItemBought(address indexed buyer, uint indexed id);
@@ -75,6 +81,12 @@ contract broccoli is Pausable, Ownable {
     _;
   }
 
+  modifier fromBuyer(uint id) {
+    if (items[id].buyer != payable(msg.sender))
+        revert NotFromBuyer();
+    _;
+  }
+
   constructor(uint _minimumDepositRatio, uint _cut) cutValid(_cut) minimumDepositValid(_minimumDepositRatio) {
     minimumDepositRatio = _minimumDepositRatio;
     cut = _cut;
@@ -92,6 +104,24 @@ contract broccoli is Pausable, Ownable {
 
   function getPendingWithdrawal() public view returns (uint) {
     return pendingWithdrawals[msg.sender];
+  }
+
+  function getItemsOnSale() public view returns (Item[] memory) {
+    Item[] memory itemsOnSaleList = new Item[](itemsOnSale.length);
+    for (uint i = 0; i < itemsOnSale.length; i++) {
+        uint id = itemsOnSale[i];
+        itemsOnSaleList[i] = items[id];
+    }
+    return itemsOnSaleList;
+  }
+
+  function getItemsOnHold() public view returns (Item[] memory) {
+    Item[] memory itemsOnHoldList = new Item[](itemsOnHold.length);
+    for (uint i = 0; i < itemsOnHold.length; i++) {
+        uint id = itemsOnHold[i];
+        itemsOnHoldList[i] = items[id];
+    }
+    return itemsOnHoldList;
   }
 
   //Public Methods
@@ -121,8 +151,9 @@ contract broccoli is Pausable, Ownable {
       uint _timestamp, 
       uint _runtime) 
       payable public whenNotPaused minimumDeposit(_price, minimumDepositRatio) {
-    numItems = numItems+1;
+    numItems = numItems + 1;
     Item storage i = items[numItems]; 
+    i.id = numItems;
     i.name = _name;
     i.description = _description;
     i.price = _price;
@@ -133,17 +164,27 @@ contract broccoli is Pausable, Ownable {
     i.runtime = _runtime;
     i.seller = payable(msg.sender);
     i.deposit = msg.value;
+    itemsOnSale.push(numItems);
     emit ItemAdded(msg.sender, numItems);
   }
 
+  //Send enough ether to buy this item, ether gets kept in contract, until buyer receives the item
   function buyItem(uint256 id) payable public whenNotPaused itemExists(id) costs(getPriceToPay(id)) {
     if(items[id].buyer == address(0)) {
         items[id].buyer = payable(msg.sender);
-        pendingWithdrawals[getSeller(id)] = pendingWithdrawals[getSeller(id)].add(getAmountToSendToSeller(id));
+        removeItemFromArray(id, itemsOnSale);
+        itemsOnHold.push(id);
         emit ItemBought(msg.sender, id);
     } else {
         revert AlreadySold();
     }
+  }
+  
+  //Buyer marks the item as recieved, thus freeing the funds for the seller to withdraw
+  function markItemAsReceived(uint256 id) public whenNotPaused itemExists(id) fromBuyer(id) {
+    items[id].received = true;
+    removeItemFromArray(id, itemsOnHold);
+    pendingWithdrawals[getSeller(id)] = pendingWithdrawals[getSeller(id)].add(getAmountToSendToSeller(id));
   }
 
   //Withdraw pattern instead of direct transfer after item has sold to prevent locking contract in transfer loop
@@ -174,5 +215,21 @@ contract broccoli is Pausable, Ownable {
   function getAmountToSendToSeller(uint256 id) internal view returns (uint256) {
     //return amount to send to seller = asking price of item * (100 - cut) + deposit
     return items[id].price.mul(uint(100).sub(cut)).div(100).add(items[id].deposit);
+  }
+
+  function getIndex(uint256 id, uint[] storage arr) internal view returns (uint256) {
+    for(uint i = 0; i < arr.length; i++) {
+        if(arr[i] == id) {
+            return i;
+        }
+    }
+    revert couldntFindIndex();
+  }
+
+  function removeItemFromArray(uint256 itemId, uint[] storage arr) internal {
+    uint idOfItemToRemove = getIndex(itemId, arr);
+    arr[idOfItemToRemove] = arr[arr.length - 1];
+    arr[arr.length - 1] = itemId;
+    arr.pop();
   }
 }

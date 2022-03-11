@@ -24,7 +24,7 @@ const generateSampleItem = () => {
         timestamp: 1646929727992,
         runtime: 10 * 60 * 60 * 1000,
         deposit: 0,
-    }
+    };
 };
 
 contract('broccoli', (accounts) => {
@@ -274,17 +274,19 @@ contract('broccoli', (accounts) => {
                     return brocc.getItem.call(1);
                 })
                 .then(result => {
-                    assert.equal(result[0], externalAddress, "Seller should be " + externalAddress + " but was: " + result[0]);
-                    assert.equal(result[1], "0x0000000000000000000000000000000000000000", "Buyer should be the zero address but was: " + result[1]);
-                    assert.equal(result[2], "testName", "Name should be testName but was: " + result[2]);
-                    assert.equal(result[3], "testDescription", "Description should be testDescription but was: " + result[3]);
-                    assert.equal(result[4], "100000000000000000", "Price should be 100000000000000000 but was: " + result[4]);
-                    assert.equal(result[5], "https://picsum.photos/seed/1/200", "Image should be https://picsum.photos/seed/1/200 but was: " + result[5]);
-                    assert.equal(result[6], 1, "Category should be 1 but was: " + result[6]);
-                    assert.equal(result[7], 1, "SubCategory should be 1 but was: " + result[7]);
-                    assert.equal(result[8], 1646929727992, "Timestamp should be 1646929727992 but was: " + result[8]);
-                    assert.equal(result[9], 36000000, "Runtime should be 36000000 (10h) but was: " + result[9]);
-                    assert.equal(result[10], "50000000000000000", "Deposit should be 50000000000000000 bu was " + result[10]);
+                    assert.equal(result[0], 1, "ID should be 1, but was: " + result[0]);
+                    assert.equal(result[1], externalAddress, "Seller should be " + externalAddress + " but was: " + result[1]);
+                    assert.equal(result[2], "0x0000000000000000000000000000000000000000", "Buyer should be the zero address but was: " + result[2]);
+                    assert.equal(result[3], "testName", "Name should be testName but was: " + result[3]);
+                    assert.equal(result[4], "testDescription", "Description should be testDescription but was: " + result[4]);
+                    assert.equal(result[5], "100000000000000000", "Price should be 100000000000000000 but was: " + result[5]);
+                    assert.equal(result[6], "https://picsum.photos/seed/1/200", "Image should be https://picsum.photos/seed/1/200 but was: " + result[6]);
+                    assert.equal(result[7], 1, "Category should be 1 but was: " + result[7]);
+                    assert.equal(result[8], 1, "SubCategory should be 1 but was: " + result[8]);
+                    assert.equal(result[9], 1646929727992, "Timestamp should be 1646929727992 but was: " + result[9]);
+                    assert.equal(result[10], 36000000, "Runtime should be 36000000 (10h) but was: " + result[10]);
+                    assert.equal(result[11], "50000000000000000", "Deposit should be 50000000000000000 but was " + result[11]);
+                    assert.equal(result[12], "0", "received should be false but was " + result[12]);
                 })
         });
         it('should have increased the numItems variable', () => {
@@ -294,6 +296,22 @@ contract('broccoli', (accounts) => {
                 })
                 .then(result => {
                     assert.equal(result.toNumber(), 1, "numItems should be 1");
+                });
+        });
+        it('should have been added to itemsOnSale', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(instance => {
+                    brocc = instance;
+                    return brocc.itemsOnSale.call(0);
+                })
+                .then(result => {
+                    assert.equal(result, "1", "item should be on in itemsOnSale array, but was: " + result);
+                    return brocc.getItemsOnSale.call();
+                })
+                .then(result => {
+                    assert.equal(result.length, 1, "1 item should be in itemOnSale array, but it were: " + result.length);
+                    assert.equal(result[0][0], "1", "id of item should be 1 but was" + result[0][0]);
                 });
         });
         it('should not be possible to add an item without deposit', () => {
@@ -355,24 +373,61 @@ contract('broccoli', (accounts) => {
                         "Should be able to buy an item.");
                 });
         });
-        it('should have a withdraw amount ready for the seller after buying', () => {
+        it('should still not give seller any pending withdrawals', () => {
             let brocc;
             return broccoli.deployed()
                 .then(instance => {
                     brocc = instance;
-                    return brocc.getItem.call(1);
+                    return brocc.getPendingWithdrawal.call({ from: externalAddress });
                 })
                 .then(result => {
-                    assert.equal(result[4], web3.utils.toWei("0.1", "ether"), "Price incorrect, was " + result[4]);
-                    assert.equal(result[10], web3.utils.toWei("0.05", "ether"), "Deposit incorrect, was " + result[10]);
-                    return brocc.cut.call();
+                    assert.equal(result, 0, "Withdrawal should be 0 if not marked as received yet");
+                });
+        });
+        it('should have been added to itemsOnHold', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(instance => {
+                    brocc = instance;
+                    return brocc.itemsOnHold.call(0);
                 })
                 .then(result => {
-                    assert.equal(result, 10, "Cut should be 10 but was " + result);
-                    return brocc.getPendingWithdrawal.call({from: externalAddress});
+                    assert.equal(result, "1", "item should be on in itemsOnHold array, but was: " + result);
+                    return brocc.getItemsOnHold.call();
                 })
                 .then(result => {
-                    //Preis 0.1 ETH, cut of 10%, deposit of 50% = 0.05 ETH
+                    assert.equal(result.length, 1, "1 item should be in itemsOnHold array, but it were: " + result.length);
+                    assert.equal(result[0][0], "1", "id of item should be 1 but was" + result[0][0]);
+                });
+        });
+        it('should not be possible to mark the item as received from other addresses than the buyers', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(async instance => {
+                    brocc = instance;
+                    await truffleAssert.reverts(
+                        brocc.markItemAsReceived(1, {from: externalAddress})); //e.g. from the seller
+                });
+        });
+        it('should be possible to mark the item as received', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(async instance => {
+                    brocc = instance;
+                    await truffleAssert.passes(
+                        brocc.markItemAsReceived(1, { from: secondExternalAddress }),
+                        "Should be able to mark an item as received from the buyer.");
+                });
+        });
+        it('should have a withdraw amount ready for the seller after marking as received', () => {
+            let brocc;
+            return broccoli.deployed()
+                .then(instance => {
+                    brocc = instance;
+                    return brocc.getPendingWithdrawal.call({ from: externalAddress });
+                })
+                .then(result => {
+                    //Price 0.1 ETH, cut of 10%, deposit of 50% = 0.05 ETH
                     const expectedWithdrawal = web3.utils.toWei((0.1*0.9 + 0.05).toString());
                     assert.equal(result, expectedWithdrawal, 
                         "Withdrawal should be "+ expectedWithdrawal + " wei, but was " + result + " wei");
@@ -445,6 +500,9 @@ contract('broccoli', (accounts) => {
                 })
                 .then(async () => {
                     await brocc.buyItem(2, {from: secondExternalAddress, value: "100000000000000000"});
+                })
+                .then(async () => {
+                    await brocc.markItemAsReceived(2, {from: secondExternalAddress});
                 })
                 .then(() => {
                     return brocc.getPendingWithdrawal.call({ from: externalAddress });
