@@ -40,4 +40,20 @@ export default class CatalogItem {
     this.deposit = deposit;
   }
 
+  public static fromContractObject(item: Record<string, string>) : CatalogItem {
+    return new CatalogItem(
+      item['id'],
+      item['seller'],
+      item['buyer'],
+      item['name'],
+      item['description'],
+      Number.parseInt(item['price']),
+      item['image'],
+      Number.parseInt(item['category']),
+      Number.parseInt(item['subCategory']),
+      new Date(Number.parseInt(item['timestamp'])),
+      Number.parseInt(item['runtime']),
+      Number.parseInt(item['deposit']),
+    );
+  }
 }

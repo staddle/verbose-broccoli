@@ -9,6 +9,7 @@
 <script lang="ts">
 import NavComponent from "./components/NavComponent.vue";
 import FooterComponent from "./components/FooterComponent.vue";
+import { useWeb3 } from "@/stores/web3";
 
 export default {
   name: "App",
@@ -16,6 +17,16 @@ export default {
     NavComponent,
     FooterComponent,
   },
+  beforeCreate() {
+    this.web3.registerWeb3();
+  },
+  setup() {
+      const web3 = useWeb3();
+
+      return {
+        web3,
+      }
+  }
 };
 </script>
 
